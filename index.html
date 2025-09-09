@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - Owambe</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: #F28627;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #F28627;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background: #e67e22;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reset Your Password</h1>
+        <div id="message"></div>
+        <form id="resetForm">
+            <div class="form-group">
+                <label for="newPassword">New Password</label>
+                <input type="password" id="newPassword" required minlength="6">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" required minlength="6">
+            </div>
+
+            <!-- ADDED: Show/Hide passwords toggle (one small addition) -->
+            <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="toggleVisibility" aria-label="Show passwords">
+                <label for="toggleVisibility" style="margin:0;">Show passwords</label>
+            </div>
+
+            <button type="submit" id="submitBtn">Reset Password</button>
+        </form>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(
+            'https://aohmcnotmqelwkfeuwbt.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFvaG1jbm90bXFlbHdrZmV1d2J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcwMjM1MTksImV4cCI6MjAzMjU5OTUxOX0.OtO4aotas2QbjCh_7m8OnBILganIv84gqinfXbu6n0c'
+        );
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+        }
+
+        function setLoading(loading) {
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = loading;
+            submitBtn.textContent = loading ? 'Resetting...' : 'Reset Password';
+        }
+
+        // Extract tokens from URL fragment
+        function getTokensFromUrl() {
+            const hash = window.location.hash.substring(1);
+            
+            // Parse the hash manually since it's not in standard query parameter format
+            const tokens = {};
+            const pairs = hash.split('&');
+            
+            pairs.forEach(pair => {
+                const [key, value] = pair.split('=');
+                if (key && value) {
+                    tokens[key] = decodeURIComponent(value);
+                }
+            });
+            
+            return {
+                access_token: tokens.access_token,
+                refresh_token: tokens.refresh_token,
+                expires_at: tokens.expires_at,
+                token_type: tokens.token_type,
+                type: tokens.type
+            };
+        }
+
+        // Set the session with the tokens from the URL
+        async function setSessionFromUrl() {
+            const tokens = getTokensFromUrl();
+            
+            if (!tokens.access_token) {
+                showMessage('Invalid reset link. Please request a new password reset.', 'error');
+                return false;
+            }
+
+            try {
+                const { data, error } = await supabase.auth.setSession({
+                    access_token: tokens.access_token,
+                    refresh_token: tokens.refresh_token
+                });
+
+                if (error) {
+                    console.error('Session error:', error);
+                    showMessage('Invalid or expired reset link. Please request a new password reset.', 'error');
+                    return false;
+                }
+
+                return true;
+            } catch (err) {
+                console.error('Error setting session:', err);
+                showMessage('Error processing reset link. Please try again.', 'error');
+                return false;
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('resetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showMessage('Password must be at least 6 characters long', 'error');
+                return;
+            }
+
+            setLoading(true);
+            showMessage('Resetting password...', 'loading');
+
+            try {
+                const { error } = await supabase.auth.updateUser({
+                    password: newPassword
+                });
+
+                if (error) {
+                    console.error('Update error:', error);
+                    showMessage('Error: ' + error.message, 'error');
+                } else {
+                    showMessage('Password updated successfully! You can now log in with your new password.', 'success');
+                    document.getElementById('resetForm').style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Unexpected error:', err);
+                showMessage('An unexpected error occurred. Please try again.', 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        // Initialize the page
+        window.addEventListener('load', async () => {
+            const sessionSet = await setSessionFromUrl();
+            if (!sessionSet) {
+                document.getElementById('resetForm').style.display = 'none';
+            }
+        });
+
+        // ADDED: Toggle visibility for both password fields
+        document.getElementById('toggleVisibility').addEventListener('change', (e) => {
+            const type = e.target.checked ? 'text' : 'password';
+            document.getElementById('newPassword').type = type;
+            document.getElementById('confirmPassword').type = type;
+        });
+    </script>
+</body>
+</html>
