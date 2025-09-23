@@ -10,7 +10,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -18,33 +18,92 @@
         }
         .container {
             background: white;
-            padding: 40px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             max-width: 400px;
             width: 100%;
+            margin: 0 auto;
+        }
+        
+        /* Mobile-first responsive design */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                padding: 15px;
+                margin: 10px;
+                max-width: none;
+                width: calc(100% - 20px);
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .container {
+                padding: 12px;
+                margin: 5px;
+                width: calc(100% - 10px);
+            }
         }
         h1 {
             color: #333;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            font-size: 24px;
+            line-height: 1.3;
         }
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             color: #555;
             font-weight: 500;
+            font-size: 14px;
         }
         input {
             width: 100%;
-            padding: 12px;
+            padding: 14px 12px;
             border: 2px solid #ddd;
-            border-radius: 5px;
+            border-radius: 6px;
             font-size: 16px;
             box-sizing: border-box;
+            -webkit-appearance: none;
+            appearance: none;
+            min-height: 48px;
+        }
+        
+        /* Mobile typography adjustments */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+            .form-group {
+                margin-bottom: 16px;
+            }
+            label {
+                font-size: 15px;
+                margin-bottom: 8px;
+            }
+            input {
+                padding: 16px 12px;
+                font-size: 16px;
+                min-height: 52px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            h1 {
+                font-size: 20px;
+                margin-bottom: 18px;
+            }
+            input {
+                padding: 14px 10px;
+                min-height: 50px;
+            }
         }
         input:focus {
             outline: none;
@@ -52,15 +111,37 @@
         }
         button {
             width: 100%;
-            padding: 12px;
+            padding: 16px 12px;
             background: #F28627;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             margin-bottom: 20px;
+            min-height: 52px;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: background-color 0.2s ease;
+        }
+        
+        /* Mobile button adjustments */
+        @media (max-width: 480px) {
+            button {
+                padding: 18px 12px;
+                min-height: 56px;
+                font-size: 17px;
+                margin-bottom: 18px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            button {
+                padding: 16px 10px;
+                min-height: 54px;
+                font-size: 16px;
+            }
         }
         button:hover {
             background: #e67e22;
@@ -90,6 +171,106 @@
             color: #0c5460;
             border: 1px solid #bee5eb;
         }
+        
+        /* Checkbox styling for mobile */
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            min-height: 20px;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        input[type="checkbox"]:checked {
+            background: #F28627;
+            border-color: #F28627;
+        }
+        
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        input[type="checkbox"]:focus {
+            outline: 2px solid #F28627;
+            outline-offset: 2px;
+        }
+        
+        /* Mobile checkbox adjustments */
+        @media (max-width: 480px) {
+            input[type="checkbox"] {
+                width: 22px;
+                height: 22px;
+                min-height: 22px;
+            }
+            
+            input[type="checkbox"]:checked::after {
+                font-size: 16px;
+            }
+        }
+        
+        /* Additional mobile optimizations */
+        @media (max-width: 480px) {
+            .message {
+                padding: 12px;
+                font-size: 14px;
+                line-height: 1.4;
+            }
+        }
+        
+        /* Prevent zoom on input focus for iOS */
+        @media screen and (-webkit-min-device-pixel-ratio: 0) {
+            input[type="password"],
+            input[type="text"] {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* Improve touch targets for very small screens */
+        @media (max-width: 320px) {
+            .container {
+                padding: 10px;
+                margin: 2px;
+                width: calc(100% - 4px);
+            }
+            
+            h1 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+            
+            input {
+                padding: 12px 8px;
+                min-height: 48px;
+                font-size: 16px;
+            }
+            
+            button {
+                padding: 14px 8px;
+                min-height: 50px;
+                font-size: 15px;
+            }
+            
+            input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+                min-height: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -107,9 +288,9 @@
             </div>
 
             <!-- ADDED: Show/Hide passwords toggle (one small addition) -->
-            <div class="form-group" style="display:flex;align-items:center;gap:8px;">
+            <div class="form-group" style="display:flex;align-items:center;gap:12px;margin-bottom: 20px;">
                 <input type="checkbox" id="toggleVisibility" aria-label="Show passwords">
-                <label for="toggleVisibility" style="margin:0;">Show passwords</label>
+                <label for="toggleVisibility" style="margin:0;cursor:pointer;font-size:15px;line-height:1.4;user-select:none;">Show passwords</label>
             </div>
 
             <button type="submit" id="submitBtn">Reset Password</button>
